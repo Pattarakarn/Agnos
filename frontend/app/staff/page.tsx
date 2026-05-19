@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import { Fields, PatientFormData } from '../schemas/patient';
 
-const socket = io('http://localhost:4000');
+const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL)
 
 interface Data {
     id: string
@@ -85,7 +85,7 @@ export default function StaffView() {
                                 '--bg-p': `${patient.progress}%`
                             } as React.CSSProperties}
                             
-                            onClick={() => router.push(`/staff/view/${patient.id}`)} // คลิกการ์ดใบนี้เพื่อดู Live View
+                            onClick={() => router.push(`/staff/view/${patient.id}`)} 
                         >
                             <span className="relative z-10 flex justify-center items-center w-full">
                                 View

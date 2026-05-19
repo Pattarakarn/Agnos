@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { io } from 'socket.io-client';
 import { Fields, PatientFormData, patientSchema } from '../schemas/patient';
 
-const socket = io('http://localhost:4000');
+const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL)
 
 export default function PatientForm() {
   const { register, handleSubmit, watch, formState: { errors, isSubmitSuccessful, dirtyFields },
@@ -13,11 +13,9 @@ export default function PatientForm() {
     setValue
   } = useForm<PatientFormData>({
     resolver: zodResolver(patientSchema),
-    // defaultValues: { firstName: '', lastName: '', }
   });
 
   const allValues = getValues();
-  const watchAllFields = watch();
   const idleTimer = useRef<NodeJS.Timeout | null>(null);
   const handleInputFocus = (fieldName: keyof PatientFormData) => {
     let formId = localStorage.getItem("formId");
@@ -30,31 +28,7 @@ export default function PatientForm() {
       currentField: fieldName
     });
   };
-  // useEffect(() => {
-  //   if (isSubmitSuccessful) return;
-
-  //   const filledCount = Object.keys(dirtyFields).length;
-  //   const progressPercentage = (filledCount / 9) * 100;
-  //   socket.emit('patient_typing', {
-  //     patientId: formId,
-  //     formData: watchAllFields,
-  //     progress: +progressPercentage.toLocaleString([], { maximumFractionDigits: 2 })
-  //   });
-
-  //   // ทำระบบ Debounce: ถ้าหยุดพิมพ์เกิน 2 วินาที ให้ถือว่า Inactive
-  //   if (idleTimer.current) clearTimeout(idleTimer.current);
-
-  //   idleTimer.current = setTimeout(() => {
-  //     socket.emit('patient_idle', {
-  //       patientId: formId,
-  //     });
-  //   }, 2000);
-
-  //   return () => {
-  //     if (idleTimer.current) clearTimeout(idleTimer.current);
-  //   };
-  // }, [watchAllFields, isSubmitSuccessful]);
-  console.log(isSubmitSuccessful)
+ 
   useEffect(() => {
     let formId = localStorage.getItem("formId");
     if (!formId) {
@@ -63,6 +37,7 @@ export default function PatientForm() {
     }
     socket.emit('patient_idle', { patientId: formId });
   }, [])
+
   const handleUserTyping = (fieldName: keyof PatientFormData, value: string) => {
     setValue(fieldName, value)
     let formId = localStorage.getItem("formId");
@@ -78,7 +53,6 @@ export default function PatientForm() {
       patientId: formId,
       currentField: fieldName,
       formData: { ...allValues, [fieldName]: value }
-      //formData: { [fieldName]: value } // อัปเดตข้อมูลทีละฟิลด์แ
     });
 
     idleTimer.current = setTimeout(() => {
