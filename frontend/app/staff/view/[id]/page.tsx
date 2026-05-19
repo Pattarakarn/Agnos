@@ -38,7 +38,7 @@ export default function LiveView({ params }: PageProps) {
     if (!patient) {
         return <div className="p-8 text-center text-slate-400">กำลังเชื่อมต่อ . . .</div>;
     }
-    // console.log(patient)
+    // console.log(patient.data)
     return (
         <div className="p-8 bg-slate-50">
             <div className="max-w-3xl mx-auto bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
@@ -79,21 +79,36 @@ export default function LiveView({ params }: PageProps) {
                                     <select
                                         className="my-2 w-full p-2 border rounded-md bg-white"
                                     >
-                                        <option value="">{patient.data[field.name]}</option>
+                                        {field.options.map((option,i) => (
+                                            option.value == patient.data[field.name]
+                                            && <option value={option.value} key={i}>{option?.label}</option>
+                                        ))}
                                     </select>
                                 </div>
-                                : <div className=''>
-                                    <label className="block text-sm font-medium text-gray-700 font-semibold">
-                                        {field.label}{
-                                            field.required && <small className='text-red-500'>*</small>
-                                        }
-                                    </label>
-                                    <input className={`mt-1 w-full p-2 border rounded-md 
+                                : field.type == "date"
+                                    ? <div>
+                                        <label className="block text-sm font-medium text-gray-700 font-semibold">
+                                            {field.label}{field.required && <small className='text-red-500'>*</small>}
+                                        </label>
+                                        <input
+                                            type='date'
+                                            readOnly
+                                            value={patient.data[field.name]}
+                                           className={`mt-1 w-full p-2 border rounded-md ${patient.currentField == field.name ? "" : "!bg-slate-50"}`}
+                                        />
+                                    </div>
+                                    : <div className=''>
+                                        <label className="block text-sm font-medium text-gray-700 font-semibold">
+                                            {field.label}{
+                                                field.required && <small className='text-red-500'>*</small>
+                                            }
+                                        </label>
+                                        <input className={`mt-1 w-full p-2 border rounded-md 
                                     ${patient.currentField == field.name ? "" : "!bg-slate-50"}`}
-                                        value={patient.data[field.name]}
-                                        readOnly
-                                    />
-                                </div>
+                                            value={patient.data[field.name]}
+                                            readOnly
+                                        />
+                                    </div>
                         }
                     </div>
 

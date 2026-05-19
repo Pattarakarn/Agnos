@@ -42,7 +42,7 @@ export default function StaffView() {
     const patientList = Object.values(patients) as Data[];
 
     return (
-        <section className='p-5 bg-slate-50 min-h-screen'>
+        <section className='p-5 bg-slate-50 min-h-screen px-10'>
             <div className='flex justify-between my-5'>
                 <div>
                     <h2 className="text-xl font-bold tracking-wide">Monitoring Dashboard</h2>

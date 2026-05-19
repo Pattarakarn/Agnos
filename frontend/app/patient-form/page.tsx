@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { io } from 'socket.io-client';
 import { Fields, PatientFormData, patientSchema } from '../schemas/patient';
 
-const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL)
+const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL)// 'http://localhost:4000');
 
 export default function PatientForm() {
   const { register, handleSubmit, watch, formState: { errors, isSubmitSuccessful, dirtyFields },
@@ -28,7 +28,7 @@ export default function PatientForm() {
       currentField: fieldName
     });
   };
- 
+
   useEffect(() => {
     let formId = localStorage.getItem("formId");
     if (!formId) {
@@ -38,8 +38,9 @@ export default function PatientForm() {
     socket.emit('patient_idle', { patientId: formId });
   }, [])
 
-  const handleUserTyping = (fieldName: keyof PatientFormData, value: string) => {
-    setValue(fieldName, value)
+  const handleUserTyping = (fieldName: keyof PatientFormData, value: string, alreadySet?: boolean) => {
+    console.log(value)
+   if(!alreadySet) setValue(fieldName, value)
     let formId = localStorage.getItem("formId");
     if (!formId) {
       formId = `${Math.floor(10000 + Math.random() * 9000)}`;
@@ -84,8 +85,7 @@ export default function PatientForm() {
             {Fields.map((field, i) => (
               <div key={i} className='my-2'>
                 {field.type == "textarea"
-                  ?
-                  <div>
+                  ? <div>
                     <label className="block text-sm font-medium text-gray-700 font-semibold">
                       {field.label}{field.required && <small className='text-red-500'>*</small>}
                     </label>
@@ -97,17 +97,14 @@ export default function PatientForm() {
                     />
                     {errors[field.name] && <p className="text-red-500 text-xs mt-1">{errors[field.name]?.message}</p>}
                   </div>
-                  :
-                  field.options
-                    ?
-                    <div>
+                  : field.options
+                    ? <div>
                       <label className="block text-sm font-medium text-gray-700 font-semibold">
-                        {field.label}
-                        {field.required && <small className='text-red-500'>*</small>}
+                        {field.label}{field.required && <small className='text-red-500'>*</small>}
                       </label>
                       <select {...register(field.name)}
                         className="my-2 w-full p-2 border rounded-md bg-white"
-                        onFocus={() => handleInputFocus(field.name)}
+                        onFocus={(e) => handleInputFocus(field.name)}
                         onChange={(e) => handleUserTyping(field.name, e.target.value)}
                       >
                         <option value="">-- เลือก{field.label} --</option>
@@ -117,26 +114,39 @@ export default function PatientForm() {
                       </select>
                       {errors[field.name] && <p className="text-red-500 text-xs mt-1">{errors[field.name]?.message}</p>}
                     </div>
-                    :
-                    <div className=''>
-                      <label className="block text-sm font-medium text-gray-700 font-semibold">
-                        {field.label}{
-                          field.required && <small className='text-red-500'>*</small>
-                        }
-                      </label>
-                      <input {...register(field.name)} className="mt-1 w-full p-2 border rounded-md"
-                        onFocus={() => handleInputFocus(field.name)}
-                        placeholder={field.placeholder}
-                        onChange={(e) => handleUserTyping(field.name, e.target.value)}
-                      />
-                      {errors[field.name] && <p className="text-red-500 text-xs mt-1">{errors[field.name]?.message}</p>}
-                    </div>
+                    : field.type == "date"
+                      ? <div>
+                        <label className="block text-sm font-medium text-gray-700 font-semibold">
+                          {field.label}{field.required && <small className='text-red-500'>*</small>}
+                        </label>
+                        <input {...register(field.name)} className="mt-1 w-full p-2 border rounded-md"
+                          onFocus={() => handleInputFocus(field.name)}
+                          placeholder={field.placeholder}
+                          type='date'
+                          // onChange={(e) => handleUserTyping(field.name, e.target.value)}
+                          onBlur={(e) => handleUserTyping(field.name, e.target.value)}
+                        />
+                        {errors[field.name] && <p className="text-red-500 text-xs mt-1">{errors[field.name]?.message}</p>}
+                      </div>
+                      :
+                      <div className=''>
+                        <label className="block text-sm font-medium text-gray-700 font-semibold">
+                          {field.label}{
+                            field.required && <small className='text-red-500'>*</small>
+                          }
+                        </label>
+                        <input {...register(field.name)} className="mt-1 w-full p-2 border rounded-md"
+                          onFocus={() => handleInputFocus(field.name)}
+                          placeholder={field.placeholder}
+                          onChange={(e) => handleUserTyping(field.name, e.target.value)}
+                        />
+                        {errors[field.name] && <p className="text-red-500 text-xs mt-1">{errors[field.name]?.message}</p>}
+                      </div>
                 }
               </div>
             ))}
 
-            <button type="submit" className="primary mt-3"
-              id="">
+            <button type="submit" className="primary mt-3">
               ส่งข้อมูล
             </button>
           </form>

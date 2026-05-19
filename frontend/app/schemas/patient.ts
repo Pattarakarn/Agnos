@@ -25,7 +25,7 @@ export type PatientFormData = z.infer<typeof patientSchema>;
 export interface IFormField {
     name: keyof PatientFormData; 
     label: string;
-    type?: "text" | "select" | "tel" | "email" | "textarea";
+    type?: "text" | "select" | "tel" | "email" | "textarea" | "date";
     placeholder?: string;
     required?: boolean;
     options?: { value: string, label: string }[];
@@ -50,7 +50,8 @@ export const Fields: IFormField[] = [
     {
         name: 'dateOfBirth',
         label: 'วัน/เดือน/ปีเกิด',
-        required: true
+        required: true,
+        type: 'date'
     },
     {
         name: 'gender',
